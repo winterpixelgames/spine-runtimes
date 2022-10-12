@@ -166,10 +166,10 @@ spine-cocos2dx/example/proj.android/app/.cxx
 spine-cocos2dx/example/build-win
 spine-godot/godot
 spine-godot/spine_godot/*.o
-spine-godot/spine_godot/spine-cpp
 spine-godot/spine_godot/__pycache__
 spine-godot/example/.import
 spine-godot/spine_godot/*.obj
+*.obj
 *.bc
 spine-godot/example/.godot
 spine-godot/example-v4/.godot
