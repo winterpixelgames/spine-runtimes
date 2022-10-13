@@ -171,6 +171,7 @@ spine-godot/example/.import
 spine-godot/spine_godot/*.obj
 *.obj
 *.bc
+*.o
 spine-godot/example/.godot
 spine-godot/example-v4/.godot
 spine-cocos2dx/example/build-macos
