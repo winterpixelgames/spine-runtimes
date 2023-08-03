@@ -44,10 +44,11 @@
 namespace spine {
 	class SP_API String : public SpineObject {
 	public:
-		String() : _length(0), _buffer(NULL) {
+		String() : _length(0), _buffer(NULL), _tofree(true) {
 		}
 
-		String(const char *chars, bool own = false) {
+		String(const char *chars, bool own = false, bool tofree = true) {
+			_tofree = tofree;
 			if (!chars) {
 				_length = 0;
 				_buffer = NULL;
@@ -63,6 +64,7 @@ namespace spine {
 		}
 
 		String(const String &other) {
+			_tofree = true;
 			if (!other._buffer) {
 				_length = 0;
 				_buffer = NULL;
@@ -87,7 +89,7 @@ namespace spine {
 
 		void own(const String &other) {
 			if (this == &other) return;
-			if (_buffer) {
+			if (_buffer && _tofree) {
 				SpineExtension::free(_buffer, __FILE__, __LINE__);
 			}
 			_length = other._length;
@@ -98,7 +100,7 @@ namespace spine {
 
 		void own(const char *chars) {
 			if (_buffer == chars) return;
-			if (_buffer) {
+			if (_buffer && _tofree) {
 				SpineExtension::free(_buffer, __FILE__, __LINE__);
 			}
 
@@ -118,7 +120,7 @@ namespace spine {
 
 		String &operator=(const String &other) {
 			if (this == &other) return *this;
-			if (_buffer) {
+			if (_buffer && _tofree) {
 				SpineExtension::free(_buffer, __FILE__, __LINE__);
 			}
 			if (!other._buffer) {
@@ -134,7 +136,7 @@ namespace spine {
 
 		String &operator=(const char *chars) {
 			if (_buffer == chars) return *this;
-			if (_buffer) {
+			if (_buffer && _tofree) {
 				SpineExtension::free(_buffer, __FILE__, __LINE__);
 			}
 			if (!chars) {
@@ -205,7 +207,7 @@ namespace spine {
 		}
 
 		~String() {
-			if (_buffer) {
+			if (_buffer && _tofree) {
 				SpineExtension::free(_buffer, __FILE__, __LINE__);
 			}
 		}
@@ -213,6 +215,7 @@ namespace spine {
 	private:
 		mutable size_t _length;
 		mutable char *_buffer;
+		mutable bool _tofree;
 	};
 }
 
