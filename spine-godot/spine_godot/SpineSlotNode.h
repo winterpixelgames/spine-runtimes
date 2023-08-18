@@ -57,6 +57,8 @@ public:
 
 	void set_slot_name(const String &_slot_name);
 
+	void compute_slot_index(SpineSprite *sprite);
+
 	String get_slot_name();
 
 	int get_slot_index() { return slot_index; }

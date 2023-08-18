@@ -35,7 +35,8 @@
 #include "scene/2d/mesh_instance_2d.h"
 
 class SpineSlotNode;
-
+class SpineEvent;
+class SpineTrackEntry;
 class SpineSprite : public Node2D, public spine::AnimationStateListenerObject {
 	GDCLASS(SpineSprite, Node2D)
 
@@ -45,6 +46,13 @@ protected:
 	Ref<SpineSkeletonDataResource> skeleton_data_res;
 	Ref<SpineSkeleton> skeleton;
 	Ref<SpineAnimationState> animation_state;
+	
+	// Added by winterpixel to allow a single
+	// godot object to be reused to refer to a new spine object
+	// to cut down on memory allocations
+	Ref<SpineTrackEntry> reusable_entry_ref;
+	Ref<SpineEvent> reusable_event_ref;
+
 	SpineConstant::UpdateMode update_mode;
 
 	String preview_skin;

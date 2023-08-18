@@ -84,11 +84,13 @@ protected:
 
 	void spine_objects_invalidated() {
 		spine_object = nullptr;
-#if VERSION_MAJOR > 3
-		spine_owner->disconnect(SNAME("_internal_spine_objects_invalidated"), callable_mp(this, &SpineObjectWrapper::spine_objects_invalidated));
-#else
-		spine_owner->disconnect(SNAME("_internal_spine_objects_invalidated"), this, SNAME("_internal_spine_objects_invalidated"));
-#endif
+		if (spine_owner) {
+			#if VERSION_MAJOR > 3
+					spine_owner->disconnect(SNAME("_internal_spine_objects_invalidated"), callable_mp(this, &SpineObjectWrapper::spine_objects_invalidated));
+			#else
+					spine_owner->disconnect(SNAME("_internal_spine_objects_invalidated"), this, SNAME("_internal_spine_objects_invalidated"));
+			#endif
+		}
 	}
 
 	SpineObjectWrapper() : spine_owner(nullptr), spine_object(nullptr) {
@@ -117,6 +119,20 @@ protected:
 		spine_owner->connect(SNAME("_internal_spine_objects_invalidated"), this, SNAME("_internal_spine_objects_invalidated"));
 #endif
 	}
+	
+	// Added by winterpixel to allow a single
+	// godot object to be reused to refer to a new spine object
+	// to cut down on memory allocations
+	template<typename OWNER, typename OBJECT>
+	void _force_set_spine_object_internal(const OWNER *_owner, OBJECT *_object) {
+		// clear the old stuff
+		spine_objects_invalidated();
+		spine_owner = nullptr;
+		// make way for the new stuff
+		if (_owner && _object) {
+			_set_spine_object_internal(_owner, _object);
+		}
+	}
 
 	void *_get_spine_object_internal() { return spine_object; }
 	void *_get_spine_owner_internal() { return spine_owner; }
@@ -130,7 +146,12 @@ public:
 	void set_spine_object(const SpineSprite *_owner, OBJECT *_object) {
 		_set_spine_object_internal(_owner, _object);
 	}
-
+	void force_set_spine_object(const SpineSprite *_owner, OBJECT *_object) {
+		// Added by winterpixel to allow a single
+		// godot object to be reused to refer to a new spine object
+		// to cut down on memory allocations
+		_force_set_spine_object_internal(_owner, _object);
+	}
 	OBJECT *get_spine_object() {
 		return (OBJECT *) _get_spine_object_internal();
 	}
@@ -147,6 +168,13 @@ class SpineSkeletonDataResourceOwnedObject : public SpineObjectWrapper {
 public:
 	void set_spine_object(const SpineSkeletonDataResource *_owner, OBJECT *_object) {
 		_set_spine_object_internal(_owner, _object);
+	}
+
+	void force_set_spine_object(const SpineSkeletonDataResource *_owner, OBJECT *_object) {
+		// Added by winterpixel to allow a single
+		// godot object to be reused to refer to a new spine object
+		// to cut down on memory allocations
+		_force_set_spine_object_internal(_owner, _object);
 	}
 
 	OBJECT *get_spine_object() {

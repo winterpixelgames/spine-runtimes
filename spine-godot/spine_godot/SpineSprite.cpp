@@ -875,35 +875,42 @@ void SpineSprite::draw_bone(spine::Bone *bone, const Color &color) {
 }
 
 void SpineSprite::callback(spine::AnimationState *state, spine::EventType type, spine::TrackEntry *entry, spine::Event *event) {
-	Ref<SpineTrackEntry> entry_ref = Ref<SpineTrackEntry>(memnew(SpineTrackEntry));
-	entry_ref->set_spine_object(this, entry);
+	if (reusable_entry_ref.is_null()) {
+		reusable_entry_ref = Ref<SpineTrackEntry>(memnew(SpineTrackEntry));
+	}
+	reusable_entry_ref->force_set_spine_object(this, entry);
 
-	Ref<SpineEvent> event_ref(nullptr);
 	if (event) {
-		event_ref = Ref<SpineEvent>(memnew(SpineEvent));
-		event_ref->set_spine_object(this, event);
+		if (reusable_event_ref.is_null()) {
+			reusable_event_ref = Ref<SpineEvent>(memnew(SpineEvent));
+		}
+		reusable_event_ref->force_set_spine_object(this, event);
 	}
 
 	switch (type) {
 		case spine::EventType_Start:
-			emit_signal(SNAME("animation_started"), this, animation_state, entry_ref);
+			emit_signal(SNAME("animation_started"), this, animation_state, reusable_entry_ref);
 			break;
 		case spine::EventType_Interrupt:
-			emit_signal(SNAME("animation_interrupted"), this, animation_state, entry_ref);
+			emit_signal(SNAME("animation_interrupted"), this, animation_state, reusable_entry_ref);
 			break;
 		case spine::EventType_End:
-			emit_signal(SNAME("animation_ended"), this, animation_state, entry_ref);
+			emit_signal(SNAME("animation_ended"), this, animation_state, reusable_entry_ref);
 			break;
 		case spine::EventType_Complete:
-			emit_signal(SNAME("animation_completed"), this, animation_state, entry_ref);
+			emit_signal(SNAME("animation_completed"), this, animation_state, reusable_entry_ref);
 			break;
 		case spine::EventType_Dispose:
-			emit_signal(SNAME("animation_disposed"), this, animation_state, entry_ref);
+			emit_signal(SNAME("animation_disposed"), this, animation_state, reusable_entry_ref);
 			break;
 		case spine::EventType_Event:
-			emit_signal(SNAME("animation_event"), this, animation_state, entry_ref, event_ref);
+			emit_signal(SNAME("animation_event"), this, animation_state, reusable_entry_ref, reusable_event_ref);
 			break;
 	}
+	if (event) {
+		reusable_event_ref->force_set_spine_object(nullptr, nullptr);
+	}
+	reusable_entry_ref->force_set_spine_object(nullptr, nullptr);
 }
 
 Transform2D SpineSprite::get_global_bone_transform(const String &bone_name) {

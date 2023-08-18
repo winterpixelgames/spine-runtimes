@@ -58,7 +58,13 @@ void SpineSlotNode::_notification(int what) {
 	switch (what) {
 		case NOTIFICATION_PARENTED: {
 			SpineSprite *sprite = cast_to<SpineSprite>(get_parent());
+			
 			if (sprite) {
+				// Added by winterpixel
+				compute_slot_index(sprite);
+				// Removed by winterpixel
+				// We dont need this stuff to happen every frame
+				/*
 #if VERSION_MAJOR > 3
 				sprite->connect(SNAME("world_transforms_changed"), callable_mp(this, &SpineSlotNode::on_world_transforms_changed));
 #else
@@ -74,6 +80,7 @@ void SpineSlotNode::_notification(int what) {
 				_change_notify("rotation_deg");
 				_change_notify("scale");
 #endif
+				*/
 			} else {
 				WARN_PRINT("SpineSlotNode parent is not a SpineSprite.");
 			}
@@ -83,11 +90,15 @@ void SpineSlotNode::_notification(int what) {
 		case NOTIFICATION_UNPARENTED: {
 			SpineSprite *sprite = cast_to<SpineSprite>(get_parent());
 			if (sprite) {
+				// Removed by winterpixel
+				// We dont need this stuff
+				/*
 #if VERSION_MAJOR > 3
 				sprite->disconnect(SNAME("world_transforms_changed"), callable_mp(this, &SpineSlotNode::on_world_transforms_changed));
 #else
 				sprite->disconnect(SNAME("world_transforms_changed"), this, SNAME("_on_world_transforms_changed"));
 #endif
+				*/
 			}
 			break;
 		}
@@ -129,6 +140,7 @@ bool SpineSlotNode::_set(const StringName &property, const Variant &value) {
 	if (property == "slot_name") {
 		slot_name = value;
 		SpineSprite *sprite = cast_to<SpineSprite>(get_parent());
+		compute_slot_index(sprite);
 		update_transform(sprite);
 #if VERSION_MAJOR == 3
 		_change_notify("transform/translation");
@@ -163,6 +175,23 @@ void SpineSlotNode::update_transform(SpineSprite *sprite) {
 	auto bone = slot->get_bone();
 	if (!bone.is_valid()) return;
 	this->set_global_transform(bone->get_global_transform());
+}
+
+void SpineSlotNode::compute_slot_index(SpineSprite *sprite) {
+	// Added by winterpixel
+	// These slot nodes are expensive
+	// We will disable their visibility so they dont do anything at runtime in update_transform
+	// They just hold a material
+	// We need the slot index to be computed, thats it
+	if (!sprite) return;
+	if (!sprite->get_skeleton().is_valid() || !sprite->get_skeleton()->get_spine_object()) return;
+	auto slot = sprite->get_skeleton()->find_slot(slot_name);
+	if (!slot.is_valid()) {
+		slot_index = -1;
+		return;
+	} else {
+		slot_index = slot->get_data()->get_index();
+	}
 }
 
 void SpineSlotNode::set_slot_name(const String &_slot_name) {
