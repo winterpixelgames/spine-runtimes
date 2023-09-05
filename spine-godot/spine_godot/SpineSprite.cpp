@@ -108,6 +108,7 @@ void SpineSprite::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("update_skeleton", "delta"), &SpineSprite::update_skeleton);
 	ClassDB::bind_method(D_METHOD("new_skin", "name"), &SpineSprite::new_skin);
+	ClassDB::bind_method(D_METHOD("on_drawing_node_draw"), &SpineSprite::on_drawing_node_draw);
 
 	ADD_SIGNAL(MethodInfo("animation_started", PropertyInfo(Variant::OBJECT, "spine_sprite", PROPERTY_HINT_TYPE_STRING, "SpineSprite"), PropertyInfo(Variant::OBJECT, "animation_state", PROPERTY_HINT_TYPE_STRING, "SpineAnimationState"), PropertyInfo(Variant::OBJECT, "track_entry", PROPERTY_HINT_TYPE_STRING, "SpineTrackEntry")));
 	ADD_SIGNAL(MethodInfo("animation_interrupted", PropertyInfo(Variant::OBJECT, "spine_sprite", PROPERTY_HINT_TYPE_STRING, "SpineSprite"), PropertyInfo(Variant::OBJECT, "animation_state", PROPERTY_HINT_TYPE_STRING, "SpineAnimationState"), PropertyInfo(Variant::OBJECT, "track_entry", PROPERTY_HINT_TYPE_STRING, "SpineTrackEntry")));
@@ -268,6 +269,14 @@ void SpineSprite::generate_meshes_for_slots(Ref<SpineSkeleton> skeleton_ref) {
 		mesh_instances.push_back(mesh_instance);
 		slot_nodes.add(spine::Vector<SpineSlotNode *>());
 	}
+
+	if (drawing_node == nullptr) {
+		drawing_node = memnew(Node2D);
+		add_child(drawing_node);
+		drawing_node->set_name("SpineSpriteDrawingNode");
+		drawing_node->connect(SNAME("draw"), this, SNAME("on_drawing_node_draw"));
+	}
+	move_child(drawing_node, get_child_count()-1);
 }
 
 void SpineSprite::remove_meshes() {
@@ -992,3 +1001,8 @@ bool SpineSprite::_edit_use_rect() const {
 	return skeleton_data_res.is_valid() && skeleton_data_res->is_skeleton_data_loaded();
 }
 #endif
+
+
+void SpineSprite::on_drawing_node_draw() {
+	update_meshes(skeleton);
+}

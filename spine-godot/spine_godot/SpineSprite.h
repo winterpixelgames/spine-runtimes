@@ -53,6 +53,15 @@ protected:
 	Ref<SpineTrackEntry> reusable_entry_ref;
 	Ref<SpineEvent> reusable_event_ref;
 
+	// Added by winterpixel to fix the drawing flicker.
+	// This node must be the last child of this SpineSprite.
+	// This node's draw notification triggers this
+	// SpineSprite's draw code (update_meshes()).
+	// This fixes a bug where the MeshInstance2D's draw()
+	// clears the canvas item after the SpineSprite has drawn.
+	Node2D* drawing_node{nullptr};
+	void on_drawing_node_draw();
+	
 	SpineConstant::UpdateMode update_mode;
 
 	String preview_skin;
