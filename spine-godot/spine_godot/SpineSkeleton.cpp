@@ -145,9 +145,8 @@ void SpineSkeleton::set_skin_by_name(const String &skin_name) {
 
 void SpineSkeleton::set_skin(Ref<SpineSkin> new_skin) {
 	SPINE_CHECK(skeleton, )
-	if (last_skin.is_valid()) last_skin.unref();
-	last_skin = new_skin;
 	skeleton->setSkin(new_skin.is_valid() && new_skin->get_spine_object() ? new_skin->get_spine_object() : nullptr);
+	last_skin = new_skin;
 }
 
 Ref<SpineAttachment> SpineSkeleton::get_attachment_by_slot_name(const String &slot_name, const String &attachment_name) {
