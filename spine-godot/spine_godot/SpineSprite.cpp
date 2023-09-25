@@ -250,7 +250,7 @@ void SpineSprite::on_skeleton_data_changed() {
 		if (update_mode == SpineConstant::UpdateMode_Process) {
 			_notification(NOTIFICATION_PROCESS);
 		} else if (update_mode == SpineConstant::UpdateMode_Physics) {
-			_notification(NOTIFICATION_INTERNAL_PHYSICS_PROCESS);
+			_notification(NOTIFICATION_PHYSICS_PROCESS);
 		}
 	}
 
@@ -337,7 +337,7 @@ void SpineSprite::_notification(int what) {
 			// We need to have full control of what order this process function executes in.
 			// We use the regular mechanisms, ie: scene tree layout to achieve this.
 			set_process(update_mode == SpineConstant::UpdateMode_Process);
-			set_physics_process_internal(update_mode == SpineConstant::UpdateMode_Physics);
+			set_physics_proces(update_mode == SpineConstant::UpdateMode_Physics);
 			break;
 		}
 		case NOTIFICATION_PROCESS: {
@@ -345,7 +345,7 @@ void SpineSprite::_notification(int what) {
 				update_skeleton(get_process_delta_time());
 			break;
 		}
-		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
+		case NOTIFICATION_PHYSICS_PROCESS: {
 			if (update_mode == SpineConstant::UpdateMode_Physics)
 				update_skeleton(get_physics_process_delta_time());
 			break;
@@ -953,7 +953,7 @@ SpineConstant::UpdateMode SpineSprite::get_update_mode() {
 void SpineSprite::set_update_mode(SpineConstant::UpdateMode v) {
 	update_mode = v;
 	set_process(update_mode == SpineConstant::UpdateMode_Process);
-	set_physics_process_internal(update_mode == SpineConstant::UpdateMode_Physics);
+	set_physics_process(update_mode == SpineConstant::UpdateMode_Physics);
 }
 
 Ref<SpineSkin> SpineSprite::new_skin(const String &name) {
