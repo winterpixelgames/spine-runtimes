@@ -248,7 +248,7 @@ void SpineSprite::on_skeleton_data_changed() {
 		generate_meshes_for_slots(skeleton);
 
 		if (update_mode == SpineConstant::UpdateMode_Process) {
-			_notification(NOTIFICATION_INTERNAL_PROCESS);
+			_notification(NOTIFICATION_PROCESS);
 		} else if (update_mode == SpineConstant::UpdateMode_Physics) {
 			_notification(NOTIFICATION_INTERNAL_PHYSICS_PROCESS);
 		}
@@ -329,11 +329,18 @@ Ref<SpineAnimationState> SpineSprite::get_animation_state() {
 void SpineSprite::_notification(int what) {
 	switch (what) {
 		case NOTIFICATION_READY: {
-			set_process_internal(update_mode == SpineConstant::UpdateMode_Process);
+			// Winterpixel Note:
+			// Note, we changed this from Internal Process to Process.
+			// Internal process _always runs first_ no matter what the layout of the scene tree is.
+			// This is a flaw that inevitably creates off by 1 frame errors.
+			// We need to have our scripts run _before_ update_meshes is called.
+			// We need to have full control of what order this process function executes in.
+			// We use the regular mechanisms, ie: scene tree layout to achieve this.
+			set_process(update_mode == SpineConstant::UpdateMode_Process);
 			set_physics_process_internal(update_mode == SpineConstant::UpdateMode_Physics);
 			break;
 		}
-		case NOTIFICATION_INTERNAL_PROCESS: {
+		case NOTIFICATION_PROCESS: {
 			if (update_mode == SpineConstant::UpdateMode_Process)
 				update_skeleton(get_process_delta_time());
 			break;
@@ -945,7 +952,7 @@ SpineConstant::UpdateMode SpineSprite::get_update_mode() {
 
 void SpineSprite::set_update_mode(SpineConstant::UpdateMode v) {
 	update_mode = v;
-	set_process_internal(update_mode == SpineConstant::UpdateMode_Process);
+	set_process(update_mode == SpineConstant::UpdateMode_Process);
 	set_physics_process_internal(update_mode == SpineConstant::UpdateMode_Physics);
 }
 
