@@ -337,7 +337,7 @@ void SpineSprite::_notification(int what) {
 			// We need to have full control of what order this process function executes in.
 			// We use the regular mechanisms, ie: scene tree layout to achieve this.
 			set_process(update_mode == SpineConstant::UpdateMode_Process);
-			set_physics_proces(update_mode == SpineConstant::UpdateMode_Physics);
+			set_physics_process(update_mode == SpineConstant::UpdateMode_Physics);
 			break;
 		}
 		case NOTIFICATION_PROCESS: {
