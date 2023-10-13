@@ -1011,5 +1011,7 @@ bool SpineSprite::_edit_use_rect() const {
 
 
 void SpineSprite::on_drawing_node_draw() {
-	update_meshes(skeleton);
+	if (is_inside_tree() && is_visible_in_tree()) {
+		update_meshes(skeleton);
+	}
 }
